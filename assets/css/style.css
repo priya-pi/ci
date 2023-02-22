@@ -1,0 +1,41 @@
+.fa-trash-can {
+    color: red;
+}
+.fa-pen {
+    color: green;
+    padding-left: 15px;
+}
+th {
+    text-transform: uppercase;
+}
+.back {
+    background-color: #F0EFEF;
+}
+.pic {
+    background-image: url('/htmlPractise/photo/company.jpg');
+    height: 890px;
+    background-position: initial;
+    background-repeat: no-repeat;
+    background-size: cover;
+    position: relative;
+ }
+.design{
+    position: absolute;
+    background-color: #B0E0E6;
+    opacity: 0.9;
+    padding: 40px;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    border-radius: 20px;
+}
+.error,.jquery-error{
+    color: red;
+}
+.form-check{
+    margin-left: 1.5em;
+}
+.container{
+    padding-top:30px;
+    
+}
