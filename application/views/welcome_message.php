@@ -4,7 +4,9 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 <html lang="en">
 <head>
 	<meta charset="utf-8">
+
 	<title>Welcome to CodeIgniter of smartgit 2</title>
+
 
 	<style type="text/css">
 
