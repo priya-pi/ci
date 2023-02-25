@@ -102,7 +102,9 @@ $route['api/book/delete'] = 'CurlBook_demo/delete';
 $route['api/book/edit'] = 'CurlBook_demo/edit';
 $route['api/book/update'] = 'CurlBook_demo/update';
 
-
+$route['customer'] = 'Customer_controller/index';
+$route['customer/csv_export'] = 'Customer_controller/exportCSV';
+$route['customer/csv_import'] = 'Customer_controller/importCSV';
 
 
 
