@@ -103,6 +103,15 @@ $route['api/book/edit'] = 'CurlBook_demo/edit';
 $route['api/book/update'] = 'CurlBook_demo/update';
 
 
+$route['customer'] = 'Customer_controller/index';
+$route['customer/csv_export'] = 'Customer_controller/exportCSV';
+$route['customer/excel_export'] = 'Customer_controller/createExcel';
+
+$route['import'] = 'Import_controller/index';
+$route['import/csv_import'] = 'Import_controller/importCSV';
+$route['import/excel_import'] = 'Import_controller/importExcel';
+
+
 
 
 
