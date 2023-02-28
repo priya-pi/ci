@@ -12,15 +12,10 @@ include APPPATH . 'views/fronted/header.php';
  </head>
  <body>
    <!-- Export Data --> 
-   <!-- <a href='<?= base_url() .
-       'customer/csv_import' ?>' class="btn btn-success"><i class="fa fa-upload" aria-hidden="true"></i>Import to csv</a> -->
    <a href='<?= base_url() .
-       'customer/excel_import' ?>' class="btn btn-info"><i class="fa fa-upload" aria-hidden="true"></i>Import to Excel</a>
-
-   <a href='<?= base_url() .
-       'customer/csv_export' ?>' class="btn btn-primary"><i class="fa fa-download"></i>Export To csv</a>
-	 <a href="<?php echo site_url() .
-      'customer/excel_export'; ?>" class="btn btn-warning"><i class="fa fa-download"></i>Export to Excel</a>
+       'export/csv_export' ?>' class="btn btn-primary"><i class="fa fa-download"></i>Export To csv</a>
+   <a href="<?php echo site_url() .
+      'export/excel_export'; ?>" class="btn btn-warning"><i class="fa fa-download"></i>Export to Excel</a>
 
 	<br><br>
 	

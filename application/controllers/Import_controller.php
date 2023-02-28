@@ -5,7 +5,6 @@ require 'vendor/autoload.php';
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 
-
 class Import_controller extends CI_Controller
 {
     public function __construct()
@@ -19,91 +18,104 @@ class Import_controller extends CI_Controller
 
     public function index()
     {
-        $data = array();
-        if($this->session->userdata('success_msg')){
+        $data = [];
+        if ($this->session->userdata('success_msg')) {
             $data['success_msg'] = $this->session->userdata('success_msg');
             $this->session->unset_userdata('success_msg');
         }
-        if($this->session->userdata('error_msg')){
+        if ($this->session->userdata('error_msg')) {
             $data['error_msg'] = $this->session->userdata('error_msg');
             $this->session->unset_userdata('error_msg');
         }
 
         $data['members'] = $this->Customer_model->getRows();
         $this->load->view('customer/import', $data);
+    }
+
+    public function importExcel()
+    {
+
+        if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+
+            $status = $this->createExcel();
+			
+            if ($status == true) {
+
+                $filename = 'upload/' . $status;
+                $filetype = \PhpOffice\PhpSpreadsheet\IOFactory::identify(
+                    $filename
+                );
+                $reader = \PhpOffice\PhpSpreadsheet\IOFactory::createReader(
+                    $filetype
+                );
+				
+                $spreadsheet = $reader->load($filename);
+                $sheet = $spreadsheet->getSheet(0);
+
+                $count_row = 0;
+                foreach ($sheet->getRowIterator() as $row) {
+                    $customer_id = $spreadsheet
+                        ->getActiveSheet()
+                        ->getCell('A' . $row->getRowIndex());
+                    $firstname = $spreadsheet
+                        ->getActiveSheet()
+                        ->getCell('B' . $row->getRowIndex());
+                    $lastname = $spreadsheet
+                        ->getActiveSheet()
+                        ->getCell('C' . $row->getRowIndex());
+                    $email = $spreadsheet
+                        ->getActiveSheet()
+                        ->getCell('D' . $row->getRowIndex());
+
+                    $data = [
+                        'firstname' => $firstname,
+                        'lastname' => $lastname,
+                        'email' => $email,
+                    ];
+
+					
+
+                    $this->db->insert('customer', $data);
+                    $count_row++;
+                }
+                $this->session->set_flashdata('success', 'data inserted');
+                redirect('import');
 
 
-		// if($_SERVER['REQUEST_METHOD'] == 'POST')
-		// {
-		// 	$status = $this->importExcel();
-		// 	if($status != false)
-		// 	{
-		// 		$filename = 'upload/'. $status;
-		// 		$filetype = \PhpOffice\PhpSpreadsheet\IOFactory::identify($filename);
-		// 		$reader =  \PhpOffice\PhpSpreadsheet\IOFactory::createReader($filetype);
-		// 		$spreadsheet = $reader->load($filename);
-		// 		$sheet = $spreadsheet->getSheet(0);
-
-		// 		$count_row = 0;
-		// 		foreach($sheet->getRowIterator() as  $row)
-		// 		{
-		// 			$customer_id = $spreadsheet->getActiveSheet()->getCell('A'.$row->getRowIndex());
-		// 			$firstname = $spreadsheet->getActiveSheet()->getCell('B'.$row->getRowIndex());
-		// 			$lastname = $spreadsheet->getActiveSheet()->getCell('C'.$row->getRowIndex());
-		// 			$email = $spreadsheet->getActiveSheet()->getCell('D'.$row->getRowIndex());
-
-		// 			$data = array(
-		// 				'customer_id' => $customer_id,
-		// 				'firstname' => $firstname,
-		// 				'lastname' => $lastname,
-		// 				'email' => $email
-		// 			);
-		// 			$this->db->insert('customer',$data);
-		// 			$count_row++;
-		// 		}
-		// 		$this->session->set_flashdata('success','data inserted');
-		// 		redirect('import');
-
-		// 	}else{
-		// 		$this->session->set_flashdata('error','data not uploaded');
-		// 		redirect('import');
-		// 	}
-		// }
-		// else
-		// {
-		// 	$this->load->view('customer/import');
-		// }
-
+            } else {
+                $this->session->set_flashdata('error', 'data not uploaded');
+                redirect('import');
+            }
+        } else {
+            $this->load->view('customer/import');
+        }
     }
 
 
+    public function createExcel()
+    {
+        $uploadPath = 'upload/';
+        if (!is_dir($uploadPath)) {
+            mkdir($uploadPath, 0777, true);
+        }
 
-	public function importExcel()
-	{
-		$uploadPath = 'upload/';
-		if(!is_dir($uploadPath))
-		{
-			mkdir($uploadPath,0777,TRUE);
-		}
-
-		$config['upload_path'] = $uploadPath;
-		$config['allowed_types'] = 'xlsx|xls';
-		$config['max_size'] = 1000000;
-		$this->load->library('upload',$config);
-		$this->upload->initialize($config);
-		if($this->upload->do_upload('file'))
-		{
-			$file = $this->upload->data();
-			return $file['file_name'];
-		}else{
-			return false;
-		}
-	}
+        $config['upload_path'] = $uploadPath;
+        $config['allowed_types'] = 'xlsx|xls';
+        $config['max_size'] = 1000000;
+        $this->load->library('upload', $config);
+        $this->upload->initialize($config);
+        if ($this->upload->do_upload('file')) {
+            $file = $this->upload->data();
+            return $file['file_name'];
+        } else {
+            return false;
+        }
+    }
 
     public function file_check($str)
     {
-		$allowed_mime_types = [
-			'text/x-comma-separated-values',
+        $allowed_mime_types = [
+            'text/x-comma-separated-values',
             'text/comma-separated-values',
             'application/octet-stream',
             'application/vnd.ms-excel',
@@ -122,14 +134,14 @@ class Import_controller extends CI_Controller
             if ($ext == 'csv' && in_array($mime, $allowed_mime_types)) {
                 return true;
             } else {
-				$this->form_validation->set_message(
+                $this->form_validation->set_message(
                     'file_check',
                     'Please select only CSV file to upload.'
                 );
                 return false;
             }
         } else {
-			$this->form_validation->set_message(
+            $this->form_validation->set_message(
                 'file_check',
                 'Please select a CSV file to upload.'
             );
@@ -137,109 +149,106 @@ class Import_controller extends CI_Controller
         }
     }
 
+    public function importCSV()
+    {
+        $data = [];
+        $memData = [];
 
+        if ($this->input->post('importSubmit')) {
+            $this->form_validation->set_rules(
+                'file',
+                'CSV file',
+                'callback_file_check'
+            );
 
-	public function importCSV()
-	{
-		$data = [];
-		$memData = [];
-	
-		if ($this->input->post('importSubmit')) {
-			$this->form_validation->set_rules(
-				'file',
-				'CSV file',
-				'callback_file_check'
-			);
-	
-			// Validate submitted form data
-			if ($this->form_validation->run() == true) {
-				$insertCount = $updateCount = $rowCount = $notAddCount = 0;
-				// If file uploaded
-				if (is_uploaded_file($_FILES['file']['tmp_name'])) {
-					// Load CSV reader library
-					$this->load->library('CSVReader');
-					// Parse data from CSV file
-					$csvData = $this->csvreader->parse_csv(
-						$_FILES['file']['tmp_name']
-					);
-					// Insert/update CSV data into database
-					if (!empty($csvData)) {
-	
-						foreach ($csvData as $row) {
-							$rowCount++;
-	
-							// Prepare data for DB insertion
-							$memData = [
-								'customer_id' => $row['customer_id'],
-								'firstname' => $row['firstname'],
-								'lastname' => $row['lastname'],
-								'email' => $row['email'],
-							];
-							// Check whether email already exists in the database
-							$con = [
-								'where' => [
-									'email' => $row['email'],
-								],
-								'returnType' => 'count',
-							];
-							$prevCount = $this->Customer_model->getRows($con);
-	
-							if ($prevCount > 0) {
-								// Update member data
-								$condition = ['email' => $row['email']];
-								$update = $this->Customer_model->update(
-									$memData,
-									$condition
-								);
-	
-								if ($update) {
-									$updateCount++;
-								}
-							} else {
-								// Insert member data
-								$insert = $this->Customer_model->insert(
-									$memData
-								);
-	
-								if ($insert) {
-									$insertCount++;
-								}
-							}
-						}
-	
-						// Status message with imported data count
-						$notAddCount =
-							$rowCount - ($insertCount + $updateCount);
-						$successMsg =
-							'Members imported successfully. Total Rows (' .
-							$rowCount .
-							') | Inserted (' .
-							$insertCount .
-							') | Updated (' .
-							$updateCount .
-							') | Not Inserted (' .
-							$notAddCount .
-							')';
-						$this->session->set_userdata(
-							'success_msg',
-							$successMsg
-						);
-					}
-				} else {
-					$this->session->set_userdata(
-						'error_msg',
-						'Error on file upload, please try again.'
-					);
-				}
-			} else {
-				$this->session->set_userdata(
-					'error_msg',
-					'Invalid file, please select only CSV file.'
-				);
-			}
-		}
-		redirect('import');
-	}
+            // Validate submitted form data
+            if ($this->form_validation->run() == true) {
+                $insertCount = $updateCount = $rowCount = $notAddCount = 0;
+                // If file uploaded
+                if (is_uploaded_file($_FILES['file']['tmp_name'])) {
+                    // Load CSV reader library
+                    $this->load->library('CSVReader');
+                    // Parse data from CSV file
+                    $csvData = $this->csvreader->parse_csv(
+                        $_FILES['file']['tmp_name']
+                    );
+                    // Insert/update CSV data into database
+                    if (!empty($csvData)) {
+                        foreach ($csvData as $row) {
+                            $rowCount++;
+
+                            // Prepare data for DB insertion
+                            $memData = [
+                                'customer_id' => $row['customer_id'],
+                                'firstname' => $row['firstname'],
+                                'lastname' => $row['lastname'],
+                                'email' => $row['email'],
+                            ];
+                            // Check whether email already exists in the database
+                            $con = [
+                                'where' => [
+                                    'email' => $row['email'],
+                                ],
+                                'returnType' => 'count',
+                            ];
+                            $prevCount = $this->Customer_model->getRows($con);
+
+                            if ($prevCount > 0) {
+                                // Update member data
+                                $condition = ['email' => $row['email']];
+                                $update = $this->Customer_model->update(
+                                    $memData,
+                                    $condition
+                                );
+
+                                if ($update) {
+                                    $updateCount++;
+                                }
+                            } else {
+                                // Insert member data
+                                $insert = $this->Customer_model->insert(
+                                    $memData
+                                );
+
+                                if ($insert) {
+                                    $insertCount++;
+                                }
+                            }
+                        }
+
+                        // Status message with imported data count
+                        $notAddCount =
+                            $rowCount - ($insertCount + $updateCount);
+                        $successMsg =
+                            'Members imported successfully. Total Rows (' .
+                            $rowCount .
+                            ') | Inserted (' .
+                            $insertCount .
+                            ') | Updated (' .
+                            $updateCount .
+                            ') | Not Inserted (' .
+                            $notAddCount .
+                            ')';
+                        $this->session->set_userdata(
+                            'success_msg',
+                            $successMsg
+                        );
+                    }
+                } else {
+                    $this->session->set_userdata(
+                        'error_msg',
+                        'Error on file upload, please try again.'
+                    );
+                }
+            } else {
+                $this->session->set_userdata(
+                    'error_msg',
+                    'Invalid file, please select only CSV file.'
+                );
+            }
+        }
+        redirect('import');
+    }
 }
 
 ?>

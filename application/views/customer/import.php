@@ -18,6 +18,7 @@ include APPPATH . 'views/fronted/header.php';
     </div>
     <?php } ?>
 	
+
     <div class="row">
         <div class="col-md-12 head">
             <div class="float-right">
@@ -39,6 +40,10 @@ include APPPATH . 'views/fronted/header.php';
 			<?php  if($this->session->flashdata('error')) {?>
 			<p><?=  $this->session->flashdata('error') ?></p>
 			<?php }?>
+
+			<?php  if($this->session->flashdata('success')) {?>
+			<p><?=  $this->session->flashdata('success') ?></p>
+			<?php }?>
         </div>
         
         <table class="table table-striped table-bordered">
@@ -51,7 +56,8 @@ include APPPATH . 'views/fronted/header.php';
                 </tr>
             </thead>
             <tbody>
-                <?php if(!empty($members)){ foreach($members as $row){ ?>
+                <?php if(!empty($members)){ 
+					foreach($members as $row){ ?>
                 <tr>
                     <td><?php echo $row['customer_id']; ?></td>
                     <td><?php echo $row['firstname']; ?></td>
@@ -66,6 +72,7 @@ include APPPATH . 'views/fronted/header.php';
     </div>
 </div>
 
+
 <script>
 function formToggle(ID){
     var element = document.getElementById(ID);
@@ -78,6 +85,8 @@ function formToggle(ID){
 </script>
 </body>
 </html>
+
+
 
 
 

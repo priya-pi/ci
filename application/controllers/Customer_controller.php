@@ -67,7 +67,7 @@ class Customer_controller extends CI_Controller
             $sheet->setCellValue('A' . $rows, $val['customer_id']);
             $sheet->setCellValue('B' . $rows, $val['firstname']);
             $sheet->setCellValue('C' . $rows, $val['lastname']);
-            $sheet->setCellValue('C' . $rows, $val['email']);
+            $sheet->setCellValue('D' . $rows, $val['email']);
 
             $rows++;
         }
