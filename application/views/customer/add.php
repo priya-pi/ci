@@ -19,7 +19,7 @@ include APPPATH . 'views/fronted/header.php';
 
 	<br><br>
 	
-		<table class="table table-striped table-bordered">
+		<!-- <table class="table table-striped table-bordered">
             <thead class="thead-dark">
                 <tr>
                     <th>ID</th>
@@ -44,6 +44,6 @@ include APPPATH . 'views/fronted/header.php';
                 <?php
                 } ?>
             </tbody>
-        </table>
+        </table> -->
   </body>
 </html>

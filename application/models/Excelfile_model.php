@@ -8,7 +8,6 @@ class Excelfile_model extends CI_Model {
 		
 		$this->db->select(array('customer_id', 'firstname', 'lastname','email'));
 		$this->db->from('customer');
-		$this->db->limit(5);  
 		$query = $this->db->get();
 		return $query->result_array();
 	}

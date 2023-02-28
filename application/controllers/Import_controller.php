@@ -73,9 +73,7 @@ class Import_controller extends CI_Controller
                         'email' => $email,
                     ];
 
-					
-
-                    $this->db->insert('customer', $data);
+                    $this->db->insert_batch('customer', $data);
                     $count_row++;
                 }
                 $this->session->set_flashdata('success', 'data inserted');
@@ -155,6 +153,7 @@ class Import_controller extends CI_Controller
         $memData = [];
 
         if ($this->input->post('importSubmit')) {
+
             $this->form_validation->set_rules(
                 'file',
                 'CSV file',
@@ -196,7 +195,7 @@ class Import_controller extends CI_Controller
                             if ($prevCount > 0) {
                                 // Update member data
                                 $condition = ['email' => $row['email']];
-                                $update = $this->Customer_model->update(
+                                $update = $this->Customer_model->update_batch(
                                     $memData,
                                     $condition
                                 );
@@ -206,7 +205,7 @@ class Import_controller extends CI_Controller
                                 }
                             } else {
                                 // Insert member data
-                                $insert = $this->Customer_model->insert(
+                                $insert = $this->Customer_model->insert_batch(
                                     $memData
                                 );
 
