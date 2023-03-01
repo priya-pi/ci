@@ -18,16 +18,17 @@ include APPPATH . 'views/fronted/header.php';
     <?php } ?>
 	
 
-    <div class="row">
+	<a href='<?= base_url() .
+     'export/csv_export' ?>' class="btn btn-primary"><i class="fa fa-download"></i>Export To csv</a>
+   		<a href="<?php echo site_url() .
+         'export/excel_export'; ?>" class="btn btn-warning"><i class="fa fa-download"></i>Export to Excel</a>
+
+    <div class="row pt-4">
         <div class="col-md-12 head">
             <div class="float-right">
                 <a href="javascript:void(0);" class="btn btn-success" onclick="formToggle('importFrm');"><i class="plus"></i> Import</a>
             </div>
-		<a href='<?= base_url() .
-     'export/csv_export' ?>' class="btn btn-primary"><i class="fa fa-download"></i>Export To csv</a>
-   <a href="<?php echo site_url() .
-       'export/excel_export'; ?>" class="btn btn-warning"><i class="fa fa-download"></i>Export to Excel</a>
-        </div>
+    	</div>
 		
         <div class="col-md-12" id="importFrm" style="display: none;">
             <form action="<?php echo base_url() .
@@ -37,7 +38,7 @@ include APPPATH . 'views/fronted/header.php';
             </form>
 
 			<form action="<?php echo base_url() .
-       			'import/excel_import'; ?>" method="post" enctype="multipart/form-data">
+       'import/excel_import'; ?>" method="post" enctype="multipart/form-data">
                 <input type="file" name="file" />
                 <input type="submit" class="btn btn-warning" name="importSubmit" value="import to excel">
             </form>

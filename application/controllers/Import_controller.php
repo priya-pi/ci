@@ -51,9 +51,13 @@ class Import_controller extends CI_Controller
 				
                 $spreadsheet = $reader->load($filename);
                 $sheet = $spreadsheet->getSheet(0);
+				
+				// echo '<pre>';
+				// pr($employeeData);
+				// exit;
 
                 $count_row = 0;
-                foreach ($sheet->getRowIterator() as $row) {
+                foreach ($sheet->getRowIterator() as $key => $row) {
                     $customer_id = $spreadsheet
                         ->getActiveSheet()
                         ->getCell('A' . $row->getRowIndex());
@@ -67,15 +71,19 @@ class Import_controller extends CI_Controller
                         ->getActiveSheet()
                         ->getCell('D' . $row->getRowIndex());
 
-                    $data = [
+                    $memData[] = [
                         'firstname' => $firstname,
                         'lastname' => $lastname,
                         'email' => $email,
                     ];
 
-                    $this->db->insert_batch('customer', $data);
-                    $count_row++;
+				
+					// $inserted = $this->Customer_model->insertExcel($memData);
+					$this->db->insert_batch('customer', $memData);
+					$count_row++;
                 }
+
+			
                 $this->session->set_flashdata('success', 'data inserted');
                 redirect('import');
 

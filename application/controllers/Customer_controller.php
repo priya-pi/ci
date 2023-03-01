@@ -29,14 +29,13 @@ class Customer_controller extends CI_Controller
     public function exportCSV()
     {
 		$output_file_name = 'csv_export_ci.csv';
-		
         header('Content-Description: File Transfer');
         header("Content-Disposition: attachment; filename=$output_file_name");
         header('Content-Type: application/csv; ');
 		
         $usersData = $this->Customer_model->getUserDetails();
         $file = fopen('php://output', 'w');
-        $header = ['customer_id', 'firstname', 'lastname', 'email'];
+        $header = ['Sr No.', 'firstname', 'lastname', 'email'];
         fputcsv($file, $header);
         foreach ($usersData as $key => $line) {
             fputcsv($file, $line);
@@ -54,14 +53,14 @@ class Customer_controller extends CI_Controller
         $spreadsheet = new Spreadsheet();
         $sheet = $spreadsheet->getActiveSheet();
 
-        $sheet->setCellValue('A1', 'Id');
+        $sheet->setCellValue('A1', 'Sr No.');
         $sheet->setCellValue('B1', 'FirstName');
         $sheet->setCellValue('C1', 'LastName');
         $sheet->setCellValue('D1', 'Email');
 		
         $rows = 2;
-        foreach ($employeeData as $val) {
-			$sheet->setCellValue('A' . $rows, $val['customer_id']);
+        foreach ($employeeData as $key => $val) {
+			$sheet->setCellValue('A' . $rows, $key+1);
             $sheet->setCellValue('B' . $rows, $val['firstname']);
             $sheet->setCellValue('C' . $rows, $val['lastname']);
             $sheet->setCellValue('D' . $rows, $val['email']);

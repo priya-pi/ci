@@ -12,7 +12,6 @@ class Customer_model extends CI_Model
     function getUserDetails()
     {
         $response = [];
-
         // Select record
         $this->db->select('customer_id,firstname,lastname,email');
         $q = $this->db->get('customer');
@@ -37,14 +36,12 @@ class Customer_model extends CI_Model
             $params['returnType'] == 'count'
         ) {
             $result = $this->db->count_all_results();
-        } 
-		else {
+        } else {
             if (array_key_exists('customer_id', $params)) {
                 $this->db->where('customer_id', $params['customer_id']);
                 $query = $this->db->get();
                 $result = $query->row_array();
-            } 
-			else {
+            } else {
                 $this->db->order_by('customer_id', 'asc');
                 if (
                     array_key_exists('start', $params) &&
@@ -68,10 +65,14 @@ class Customer_model extends CI_Model
         return $result;
     }
 
-    public function insert($memData)
+    // function insertExcel($data)
+    // {
+    //     $this->db->insert_batch('customer', $data);
+    // }
+
+    function insert($memData)
     {
         if (!empty($memData)) {
-         
             $insert = $this->db->insert_batch($this->table, $memData);
             return $insert;
         }
@@ -81,11 +82,13 @@ class Customer_model extends CI_Model
     public function update($memData, $condition)
     {
         if (!empty($memData)) {
-
-            $update = $this->db->update_batch($this->table, $memData,$condition);
+            $update = $this->db->update_batch(
+                $this->table,
+                $memData,
+                $condition
+            );
             return $update;
         }
         return false;
     }
-
 }
