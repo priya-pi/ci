@@ -5,7 +5,8 @@ include APPPATH . 'views/fronted/header.php';
 ?>
 <div class="container">
     <h2>Members List</h2>
-	
+
+	<!-- csv message -->
     <?php if (!empty($success_msg)) { ?>
     <div class="col-xs-12">
         <div class="alert alert-success"><?php echo $success_msg; ?></div>
@@ -16,7 +17,15 @@ include APPPATH . 'views/fronted/header.php';
         <div class="alert alert-danger"><?php echo $error_msg; ?></div>
     </div>
     <?php } ?>
+
+	<!-- excel message -->
+	<?php if ($this->session->flashdata('error')) { ?>
+	<div  class="alert alert-danger"><?= $this->session->flashdata('error') ?></div>
+	<?php } ?>
 	
+	<?php if ($this->session->flashdata('success')) { ?>
+	<div  class="alert alert-success"><?= $this->session->flashdata('success') ?></div>
+	<?php } ?>
 
 	<a href='<?= base_url() .
      'export/csv_export' ?>' class="btn btn-primary"><i class="fa fa-download"></i>Export To csv</a>
@@ -38,18 +47,11 @@ include APPPATH . 'views/fronted/header.php';
             </form>
 
 			<form action="<?php echo base_url() .
-       'import/excel_import'; ?>" method="post" enctype="multipart/form-data">
+       			'import/excel_import'; ?>" method="post" enctype="multipart/form-data">
                 <input type="file" name="file" />
                 <input type="submit" class="btn btn-warning" name="importSubmit" value="import to excel">
             </form>
 
-			<?php if ($this->session->flashdata('error')) { ?>
-			<p><?= $this->session->flashdata('error') ?></p>
-			<?php } ?>
-
-			<?php if ($this->session->flashdata('success')) { ?>
-			<p><?= $this->session->flashdata('success') ?></p>
-			<?php } ?>
         </div>
         
         <table class="table table-striped table-bordered">

@@ -28,19 +28,16 @@ class Import_controller extends CI_Controller
             $this->session->unset_userdata('error_msg');
         }
 
-        $data['members'] = $this->Customer_model->getRows();
+        $data['members'] = $this->Customer_model->getUserDetails();
         $this->load->view('customer/import', $data);
     }
 
     public function importExcel()
     {
-
         if ($_SERVER['REQUEST_METHOD'] == 'POST') {
-
             $status = $this->createExcel();
-			
-            if ($status == true) {
 
+            if ($status == true) {
                 $filename = 'upload/' . $status;
                 $filetype = \PhpOffice\PhpSpreadsheet\IOFactory::identify(
                     $filename
@@ -48,46 +45,63 @@ class Import_controller extends CI_Controller
                 $reader = \PhpOffice\PhpSpreadsheet\IOFactory::createReader(
                     $filetype
                 );
-				
+
                 $spreadsheet = $reader->load($filename);
                 $sheet = $spreadsheet->getSheet(0);
-				
-				// echo '<pre>';
-				// pr($employeeData);
-				// exit;
 
-                $count_row = 0;
-                foreach ($sheet->getRowIterator() as $key => $row) {
-                    $customer_id = $spreadsheet
-                        ->getActiveSheet()
-                        ->getCell('A' . $row->getRowIndex());
-                    $firstname = $spreadsheet
-                        ->getActiveSheet()
-                        ->getCell('B' . $row->getRowIndex());
-                    $lastname = $spreadsheet
-                        ->getActiveSheet()
-                        ->getCell('C' . $row->getRowIndex());
-                    $email = $spreadsheet
-                        ->getActiveSheet()
-                        ->getCell('D' . $row->getRowIndex());
-
-                    $memData[] = [
-                        'firstname' => $firstname,
-                        'lastname' => $lastname,
-                        'email' => $email,
-                    ];
-
-				
-					// $inserted = $this->Customer_model->insertExcel($memData);
-					$this->db->insert_batch('customer', $memData);
-					$count_row++;
+                $allDataInSheet = $spreadsheet->getActiveSheet()->toArray(null, true, true, true);
+                $flag = true;
+                $i = 0;
+                foreach ($allDataInSheet as $value) {
+                    if ($flag) {
+                        $flag = false;
+                        continue;
+                    }
+                    $memData[$i]['firstname'] = $value['B'];
+                    $memData[$i]['lastname'] = $value['C'];
+                    $memData[$i]['email'] = $value['D'];
+                    $i++;
                 }
 
-			
-                $this->session->set_flashdata('success', 'data inserted');
+				$prevCount = $this->db->get('customer')->num_rows();
+				if($prevCount > 0)
+				{
+					$condition = "email";
+					$this->session->set_flashdata('success', 'data updated');
+					$this->db->update_batch('customer', $memData,$condition);
+
+				}else{
+					$this->session->set_flashdata('success', 'data imported');
+					$this->db->insert_batch('customer', $memData);
+				}
+
+                // $count_row = 0;
+                // foreach ($sheet->getRowIterator() as $key => $row) {
+                //     $customer_id = $spreadsheet
+                //         ->getActiveSheet()
+                //         ->getCell('A' . $row->getRowIndex());
+                //     $firstname = $spreadsheet
+                //         ->getActiveSheet()
+                //         ->getCell('B' . $row->getRowIndex());
+                //     $lastname = $spreadsheet
+                //         ->getActiveSheet()
+                //         ->getCell('C' . $row->getRowIndex());
+                //     $email = $spreadsheet
+                //         ->getActiveSheet()
+                //         ->getCell('D' . $row->getRowIndex());
+
+                //     $memData[] = [
+                //         'firstname' => $firstname,
+                //         'lastname' => $lastname,
+                //         'email' => $email,
+                //     ];
+                // }
+
+				// 	$this->db->insert_batch('customer', $memData);
+
+
+                // $this->session->set_flashdata('success', 'data imported');
                 redirect('import');
-
-
             } else {
                 $this->session->set_flashdata('error', 'data not uploaded');
                 redirect('import');
@@ -96,7 +110,6 @@ class Import_controller extends CI_Controller
             $this->load->view('customer/import');
         }
     }
-
 
     public function createExcel()
     {
@@ -161,7 +174,6 @@ class Import_controller extends CI_Controller
         $memData = [];
 
         if ($this->input->post('importSubmit')) {
-
             $this->form_validation->set_rules(
                 'file',
                 'CSV file',
@@ -170,17 +182,17 @@ class Import_controller extends CI_Controller
 
             // Validate submitted form data
             if ($this->form_validation->run() == true) {
-
                 $rowCount = $notAddCount = 0;
                 // If file uploaded
                 if (is_uploaded_file($_FILES['file']['tmp_name'])) {
                     $this->load->library('CSVReader');
-                    $csvData = $this->csvreader->parse_csv($_FILES['file']['tmp_name']);
+                    $csvData = $this->csvreader->parse_csv(
+                        $_FILES['file']['tmp_name']
+                    );
 
                     if (!empty($csvData)) {
                         foreach ($csvData as $row) {
-                           
-							$rowCount++;
+                            $rowCount++;
                             $memData[] = [
                                 'firstname' => $row['firstname'],
                                 'lastname' => $row['lastname'],
@@ -194,24 +206,34 @@ class Import_controller extends CI_Controller
                                 'returnType' => 'count',
                             ];
                             $prevCount = $this->Customer_model->getRows($con);
-						}
-						if($prevCount > 0)
-						{
-							$condition = "email";
-							$updated  = $this->Customer_model->update($memData,$condition);
-
-						}else{
-
-							$inserted = $this->Customer_model->insert($memData);
-						}			
+                        }
+                        if ($prevCount > 0) {
+                            $condition = 'email';
+                            $updated = $this->Customer_model->update(
+                                $memData,
+                                $condition
+                            );
+                        } else {
+                            $inserted = $this->Customer_model->insert($memData);
+                        }
                         // Status message with imported data count
-                        $notAddCount = $rowCount - ($insertCount + $updateCount);
+                        $notAddCount =
+                            $rowCount - ($insertCount + $updateCount);
                         $successMsg =
-                            'Members imported successfully. Total Rows (' . $rowCount .
-                            ') | Inserted (' .($inserted ?? 0).
-                            ') | Updated (' .($updated ?? 0 ).') 
-							| Not Inserted (' . $notAddCount .')';
-                        $this->session->set_userdata('success_msg',$successMsg);
+                            'Members imported successfully. Total Rows (' .
+                            $rowCount .
+                            ') | Inserted (' .
+                            ($inserted ?? 0) .
+                            ') | Updated (' .
+                            ($updated ?? 0) .
+                            ') 
+							| Not Inserted (' .
+                            $notAddCount .
+                            ')';
+                        $this->session->set_userdata(
+                            'success_msg',
+                            $successMsg
+                        );
                     }
                 } else {
                     $this->session->set_userdata(

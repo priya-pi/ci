@@ -25,6 +25,7 @@ class Customer_controller extends CI_Controller
         $this->load->view('customer/add', $data);
     }
 
+	
     // Export data in CSV format
     public function exportCSV()
     {
