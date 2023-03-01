@@ -162,23 +162,18 @@ class Import_controller extends CI_Controller
 
             // Validate submitted form data
             if ($this->form_validation->run() == true) {
-                $insertCount = $updateCount = $rowCount = $notAddCount = 0;
+
+                $rowCount = $notAddCount = 0;
                 // If file uploaded
                 if (is_uploaded_file($_FILES['file']['tmp_name'])) {
-                    // Load CSV reader library
                     $this->load->library('CSVReader');
-                    // Parse data from CSV file
-                    $csvData = $this->csvreader->parse_csv(
-                        $_FILES['file']['tmp_name']
-                    );
-                    // Insert/update CSV data into database
+                    $csvData = $this->csvreader->parse_csv($_FILES['file']['tmp_name']);
+
                     if (!empty($csvData)) {
                         foreach ($csvData as $row) {
-                            $rowCount++;
-
-                            // Prepare data for DB insertion
-                            $memData = [
-                                'customer_id' => $row['customer_id'],
+                           
+							$rowCount++;
+                            $memData[] = [
                                 'firstname' => $row['firstname'],
                                 'lastname' => $row['lastname'],
                                 'email' => $row['email'],
@@ -191,47 +186,24 @@ class Import_controller extends CI_Controller
                                 'returnType' => 'count',
                             ];
                             $prevCount = $this->Customer_model->getRows($con);
+						}
+						if($prevCount > 0)
+						{
+							$condition = "email";
+							$updated  = $this->Customer_model->update($memData,$condition);
 
-                            if ($prevCount > 0) {
-                                // Update member data
-                                $condition = ['email' => $row['email']];
-                                $update = $this->Customer_model->update_batch(
-                                    $memData,
-                                    $condition
-                                );
+						}else{
 
-                                if ($update) {
-                                    $updateCount++;
-                                }
-                            } else {
-                                // Insert member data
-                                $insert = $this->Customer_model->insert_batch(
-                                    $memData
-                                );
-
-                                if ($insert) {
-                                    $insertCount++;
-                                }
-                            }
-                        }
-
+							$inserted = $this->Customer_model->insert($memData);
+						}			
                         // Status message with imported data count
-                        $notAddCount =
-                            $rowCount - ($insertCount + $updateCount);
+                        $notAddCount = $rowCount - ($insertCount + $updateCount);
                         $successMsg =
-                            'Members imported successfully. Total Rows (' .
-                            $rowCount .
-                            ') | Inserted (' .
-                            $insertCount .
-                            ') | Updated (' .
-                            $updateCount .
-                            ') | Not Inserted (' .
-                            $notAddCount .
-                            ')';
-                        $this->session->set_userdata(
-                            'success_msg',
-                            $successMsg
-                        );
+                            'Members imported successfully. Total Rows (' . $rowCount .
+                            ') | Inserted (' .($inserted ?? 0).
+                            ') | Updated (' .($updated ?? 0 ).') 
+							| Not Inserted (' . $notAddCount .')';
+                        $this->session->set_userdata('success_msg',$successMsg);
                     }
                 } else {
                     $this->session->set_userdata(

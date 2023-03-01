@@ -28,17 +28,16 @@ class Customer_controller extends CI_Controller
     // Export data in CSV format
     public function exportCSV()
     {
-		$output_file_name = 'upload/abc.csv';
-        $file = fopen($output_file_name, 'w');
-
+		$output_file_name = 'csv_export_ci.csv';
+		
         header('Content-Description: File Transfer');
-        // header("Content-Disposition: attachment; filename=$output_file_name");
-        header("Content-Disposition: attachment;");
+        header("Content-Disposition: attachment; filename=$output_file_name");
         header('Content-Type: application/csv; ');
-
+		
         $usersData = $this->Customer_model->getUserDetails();
-        // $header = ['customer_id', 'firstname', 'lastname', 'email'];
-        // fputcsv($file, $header);
+        $file = fopen('php://output', 'w');
+        $header = ['customer_id', 'firstname', 'lastname', 'email'];
+        fputcsv($file, $header);
         foreach ($usersData as $key => $line) {
             fputcsv($file, $line);
         }
@@ -49,10 +48,9 @@ class Customer_controller extends CI_Controller
     // Export data in Excel format
     public function createExcel()
     {
-        $fileName = 'customer.xlsx';
 
+        $fileName = 'excel_export_ci.xlsx';
         $employeeData = $this->Excelfile_model->customerList();
-
         $spreadsheet = new Spreadsheet();
         $sheet = $spreadsheet->getActiveSheet();
 
@@ -82,15 +80,6 @@ class Customer_controller extends CI_Controller
 		foreach (range('A6','D6') as $col) {
 			$sheet->getColumnDimension($col)->setAutoSize(true); 	 
 		}
-		// $styleArray = array(
-		// 	'borders' => array(
-		// 		'allborders' => array(
-		// 			'style' => Border::BORDER_MEDIUM,
-		// 			'color' => array('argb' => '000000'),
-		// 		),
-		// 	),
-		// );
-		// $sheet->getStyle('A1:D6'.$rows)->applyFromArray($styleArray);
 		
         $writer = new Xlsx($spreadsheet);
         $writer->save('upload/' . $fileName);

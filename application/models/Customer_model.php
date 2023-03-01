@@ -37,12 +37,14 @@ class Customer_model extends CI_Model
             $params['returnType'] == 'count'
         ) {
             $result = $this->db->count_all_results();
-        } else {
+        } 
+		else {
             if (array_key_exists('customer_id', $params)) {
                 $this->db->where('customer_id', $params['customer_id']);
                 $query = $this->db->get();
                 $result = $query->row_array();
-            } else {
+            } 
+			else {
                 $this->db->order_by('customer_id', 'asc');
                 if (
                     array_key_exists('start', $params) &&
@@ -66,39 +68,22 @@ class Customer_model extends CI_Model
         return $result;
     }
 
-    public function insert($data = [])
+    public function insert($memData)
     {
-        if (!empty($data)) {
-            // Add created and modified date if not included
-            if (!array_key_exists('created', $data)) {
-                $data['created'] = date('Y-m-d H:i:s');
-            }
-            if (!array_key_exists('modified', $data)) {
-                $data['modified'] = date('Y-m-d H:i:s');
-            }
-
-            // Insert member data
-            $insert = $this->db->insert($this->table, $data);
-
-            // Return the status
-            return $insert ? $this->db->insert_id() : false;
+        if (!empty($memData)) {
+         
+            $insert = $this->db->insert_batch($this->table, $memData);
+            return $insert;
         }
         return false;
     }
 
-    public function update($data, $condition = [])
+    public function update($memData, $condition)
     {
-        if (!empty($data)) {
-            // Add modified date if not included
-            if (!array_key_exists('modified', $data)) {
-                $data['modified'] = date('Y-m-d H:i:s');
-            }
+        if (!empty($memData)) {
 
-            // Update member data
-            $update = $this->db->update($this->table, $data, $condition);
-
-            // Return the status
-            return $update ? true : false;
+            $update = $this->db->update_batch($this->table, $memData,$condition);
+            return $update;
         }
         return false;
     }

@@ -37,7 +37,7 @@ include APPPATH . 'views/fronted/header.php';
             </form>
 
 			<form action="<?php echo base_url() .
-       'import/excel_import'; ?>" method="post" enctype="multipart/form-data">
+       			'import/excel_import'; ?>" method="post" enctype="multipart/form-data">
                 <input type="file" name="file" />
                 <input type="submit" class="btn btn-warning" name="importSubmit" value="import to excel">
             </form>
