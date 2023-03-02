@@ -47,9 +47,10 @@ class Import_controller extends CI_Controller
                 );
 
                 $spreadsheet = $reader->load($filename);
-                $sheet = $spreadsheet->getSheet(0);
+                $allDataInSheet = $spreadsheet
+                    ->getActiveSheet()
+                    ->toArray(null, true, true, true);
 
-                $allDataInSheet = $spreadsheet->getActiveSheet()->toArray(null, true, true, true);
                 $flag = true;
                 $i = 0;
                 foreach ($allDataInSheet as $value) {
@@ -62,18 +63,15 @@ class Import_controller extends CI_Controller
                     $memData[$i]['email'] = $value['D'];
                     $i++;
                 }
-
-				$prevCount = $this->db->get('customer')->num_rows();
-				if($prevCount > 0)
-				{
-					$condition = "email";
-					$this->session->set_flashdata('success', 'data updated');
-					$this->db->update_batch('customer', $memData,$condition);
-
-				}else{
-					$this->session->set_flashdata('success', 'data imported');
-					$this->db->insert_batch('customer', $memData);
-				}
+                $prevCount = $this->db->get('customer')->num_rows();
+                if ($prevCount > 0) {
+                    $condition = 'email';
+                    $this->session->set_flashdata('success', 'data updated');
+                    $this->db->update_batch('customer', $memData, $condition);
+                } else {
+                    $this->session->set_flashdata('success', 'data imported');
+                    $this->db->insert_batch('customer', $memData);
+                }
 
                 // $count_row = 0;
                 // foreach ($sheet->getRowIterator() as $key => $row) {
@@ -97,13 +95,15 @@ class Import_controller extends CI_Controller
                 //     ];
                 // }
 
-				// 	$this->db->insert_batch('customer', $memData);
-
-
                 // $this->session->set_flashdata('success', 'data imported');
+                // 	$this->db->insert_batch('customer', $memData);
+
                 redirect('import');
             } else {
-                $this->session->set_flashdata('error', 'data not uploaded');
+                $this->session->set_flashdata(
+                    'error',
+                    'Invalid file, please select only Xlsx file.'
+                );
                 redirect('import');
             }
         } else {
@@ -248,6 +248,49 @@ class Import_controller extends CI_Controller
                 );
             }
         }
+        redirect('import');
+    }
+
+    public function csv()
+    {
+        $csv = $_FILES['file']['tmp_name'];
+        $row = 0;
+        $skip_row_number = ['1'];
+        $handle = fopen($csv, 'r');
+        while (($data = fgetcsv($handle, 10000, ',')) != false) {
+            $row++;
+            $num = count($data);
+
+            if (in_array($row, $skip_row_number)) {
+                continue;
+                // skip row of csv
+            } else {
+
+				$prevCount = $this->db->get('customer')->num_rows();
+                if ($prevCount > 0) {
+
+                    $this->session->set_flashdata('success', 'data updated');
+                    $this->db->update(
+                        'customer',
+                        [
+                            'firstname' => $data[1],
+                            'lastname' => $data[2],
+                            'email' => $data[3],
+                        ],
+                        'email'
+                    );
+                } else {
+
+                    $this->session->set_flashdata('success', 'data imported');
+                    $this->db->insert('customer', [
+                        'firstname' => $data[1],
+                        'lastname' => $data[2],
+                        'email' => $data[3],
+                    ]);
+                }
+            }
+        }
+        // fclose($handle);
         redirect('import');
     }
 }

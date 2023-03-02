@@ -6,6 +6,12 @@ include APPPATH . 'views/fronted/header.php';
 <div class="container">
     <h2>Members List</h2>
 
+
+	<form action="<?php echo base_url('import/csv'); ?>"  method="POST" enctype="multipart/form-data">
+		<input type="file" class="custom-file-input" id="csv_file" name="file"> 
+		<button class="btn btn-success" type="submit"> Import</button>	
+	</form>
+
 	<!-- csv message -->
     <?php if (!empty($success_msg)) { ?>
     <div class="col-xs-12">

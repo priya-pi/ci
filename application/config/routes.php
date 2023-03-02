@@ -111,6 +111,8 @@ $route['import'] = 'Import_controller/index';
 $route['import/csv_import'] = 'Import_controller/importCSV';
 $route['import/excel_import'] = 'Import_controller/importExcel';
 
+$route['import/csv'] = 'Import_controller/csv';
+
 
 
 

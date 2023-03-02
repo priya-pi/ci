@@ -65,11 +65,6 @@ class Customer_model extends CI_Model
         return $result;
     }
 
-    function insertExcel($data)
-    {
-        $this->db->insert_batch('customer', $data);
-    }
-
     function insert($memData)
     {
         if (!empty($memData)) {
